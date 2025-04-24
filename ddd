@@ -1,0 +1,286 @@
+สร้างไฟล์ ไฟล์ index.html zip พร้อมใช้งาน 
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>เรซูเม่พนักงาน</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Tahoma, sans-serif;
+      margin: 0;
+      padding: 40px;
+      background-color: #f7f7f7;
+    }
+    .resume-container {
+      width: 210mm; /* A4 width */
+      height: 297mm; /* A4 height */
+      margin: auto;
+      background-color: #fff;
+      padding: 30px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+    .left-panel {
+      width: 25%;
+      text-align: center;
+      padding-right: 20px;
+      border-right: 2px solid #eee;
+    }
+    .left-panel img {
+      width: 100%;
+      max-width: 180px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .right-panel {
+      width: 75%;
+      padding-left: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px; /* ลดระยะห่างระหว่างตารางและหัวข้อ */
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+    th {
+      background-color: #f4f4f4;
+      font-weight: bold;
+    }
+    .section-title {
+      font-weight: bold;
+      margin-bottom: 5px; /* ลดระยะห่างระหว่างหัวข้อกับตาราง */
+      color: #444;
+      margin-top: 50px; /* ขยับหัวข้อออกไป 50px */
+    }
+    canvas {
+      max-width: 100%;
+      margin-top: 20px;
+    }
+    .print-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #800000;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .print-button:hover {
+      background-color: #600000;
+    }
+    .employee-select {
+      margin-top: 10px;
+    }
+    select {
+      padding: 8px;
+      font-size: 16px;
+      width: 100%;
+    }
+
+    /* สำหรับการพิมพ์ */
+    @media print {
+      body {
+        padding: 0;
+        margin: 0;
+      }
+      .resume-container {
+        width: 210mm;
+        height: 297mm;
+        padding: 20mm;
+        box-shadow: none;
+        page-break-before: always;
+      }
+      .print-button {
+        display: none; /* ซ่อนปุ่มพิมพ์เมื่อพิมพ์ */
+      }
+      select {
+        border: none; /* ลบขอบของ select เมื่อพิมพ์ */
+        background-color: transparent; /* ทำให้พื้นหลังเป็นโปร่งใส */
+        color: black; /* ให้ข้อความใน select เป็นสีดำ */
+      }
+      .employee-select label {
+        display: none; /* ซ่อน label เมื่อพิมพ์ */
+      }
+      table th, table td {
+        border: 1px solid black; /* ขอบตารางเป็นสีดำ */
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="resume-container">
+    <div class="header">
+      <!-- รูปภาพอยู่ทางซ้าย -->
+      <div class="left-panel">
+        <img id="empImage" src="https://mbal.mcu.ac.th/wp-content/uploads/elementor/forms/670c8e92c5c78.jpg" alt="รูปพนักงาน">
+      </div>
+
+      <!-- ข้อมูลพนักงานอยู่ทางขวา -->
+      <div class="right-panel">
+        <!-- ลบชื่อพนักงานที่อยู่ข้างบนสุด -->
+        
+        <!-- ย้าย Select จากส่วนบนไปไว้ด้านล่างของชื่อ -->
+        <div class="employee-select">
+          <label for="employeeSelect">เลือกพนักงาน: </label>
+          <select id="employeeSelect" onchange="updateResume()">
+            <option value="EMP001">สมชาย ใจดี</option>
+            <option value="EMP002">สมหญิง แสนงาม</option>
+            <option value="EMP003">วิทยา ศรีสุข</option>
+          </select>
+        </div>
+
+        <div class="section-title">ข้อมูลพนักงาน</div>
+        <table>
+          <tr>
+            <th>ตำแหน่ง</th>
+            <td id="empPosition">เจ้าหน้าที่</td>
+          </tr>
+          <tr>
+            <th>แผนก</th>
+            <td id="empDepartment">บัญชี</td>
+          </tr>
+          <tr>
+            <th>รหัสพนักงาน</th>
+            <td id="empId">EMP001</td>
+          </tr>
+        </table>
+
+        <div class="section-title">ข้อมูลการเข้า-ออกงาน</div>
+        <table>
+          <tr>
+            <th>ขาด</th>
+            <td id="empAbsent">2 วัน</td>
+          </tr>
+          <tr>
+            <th>ลา</th>
+            <td id="empLeave">1 วัน</td>
+          </tr>
+          <tr>
+            <th>มาสาย</th>
+            <td id="empLate">3 ครั้ง</td>
+          </tr>
+        </table>
+
+        <div class="section-title">กิจกรรมที่เข้าร่วม</div>
+        <table>
+          <tr>
+            <th>กิจกรรม</th>
+            <td id="empActivity">สัมมนาภายใน, อบรม Excel</td>
+          </tr>
+          <tr>
+            <th>จำนวนกิจกรรม</th>
+            <td id="empActivityCount">2 กิจกรรม</td>
+          </tr>
+        </table>
+
+        <canvas id="attendanceChart"></canvas>
+
+        <button class="print-button" onclick="window.print()">พิมพ์รายงาน</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const employees = {
+      "EMP001": {
+        name: "สมชาย ใจดี",
+        position: "เจ้าหน้าที่",
+        department: "บัญชี",
+        absent: 2,
+        leave: 1,
+        late: 3,
+        activity: "สัมมนาภายใน, อบรม Excel",
+        activityCount: "2 กิจกรรม",
+        image: "https://mbal.mcu.ac.th/wp-content/uploads/elementor/forms/670c8e92c5c78.jpg"
+      },
+      "EMP002": {
+        name: "สมหญิง แสนงาม",
+        position: "ผู้จัดการ",
+        department: "ทรัพยากรบุคคล",
+        absent: 0,
+        leave: 2,
+        late: 0,
+        activity: "ประชุมใหญ่ประจำปี",
+        activityCount: "1 กิจกรรม",
+        image: "https://mbal.mcu.ac.th/wp-content/uploads/elementor/forms/671a46126fb81.jpg"
+      },
+      "EMP003": {
+        name: "วิทยา ศรีสุข",
+        position: "วิศวกร",
+        department: "วิศวกรรม",
+        absent: 1,
+        leave: 1,
+        late: 1,
+        activity: "ออกบูธแสดงสินค้า, เวิร์กช็อปเทคโนโลยี",
+        activityCount: "2 กิจกรรม",
+        image: "https://mbal.mcu.ac.th/wp-content/uploads/elementor/forms/67021e7726b16.jpeg"
+      }
+    };
+
+    const ctx = document.getElementById('attendanceChart').getContext('2d');
+    let chart;
+
+    function updateResume() {
+      const selectedId = document.getElementById("employeeSelect").value;
+      const emp = employees[selectedId];
+      
+      document.getElementById("empId").innerText = selectedId;
+      document.getElementById("empPosition").innerText = emp.position;
+      document.getElementById("empDepartment").innerText = emp.department;
+      document.getElementById("empAbsent").innerText = emp.absent + ' วัน';
+      document.getElementById("empLeave").innerText = emp.leave + ' วัน';
+      document.getElementById("empLate").innerText = emp.late + ' ครั้ง';
+      document.getElementById("empActivity").innerText = emp.activity;
+      document.getElementById("empActivityCount").innerText = emp.activityCount;
+      document.getElementById("empImage").src = emp.image;
+
+      // Update chart
+      const data = {
+        labels: ['ขาด', 'ลา', 'มาสาย'],
+        datasets: [{
+          label: 'จำนวนวัน/ครั้ง',
+          data: [emp.absent, emp.leave, emp.late],
+          backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 159, 64, 0.2)'],
+          borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 159, 64, 1)'],
+          borderWidth: 1
+        }]
+      };
+
+      if (chart) {
+        chart.destroy(); // Destroy previous chart to avoid multiple charts
+      }
+      
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: data,
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    // Initialize with the first employee
+    updateResume();
+  </script>
+
+</body>
+</html>
